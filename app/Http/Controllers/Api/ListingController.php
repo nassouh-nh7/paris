@@ -27,6 +27,7 @@ class ListingController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $this->validateListing($request);
+        $validated['rental_blocked_dates'] = [];
         $validated['id'] = $validated['id'] ?? Str::uuid()->toString();
 
         $listing = Listing::query()->create($validated);
@@ -75,8 +76,8 @@ class ListingController extends Controller
             'network_image_urls.*' => ['required', 'string', 'max:2000'],
             'local_image_paths' => [...$required, 'array'],
             'local_image_paths.*' => ['required', 'string', 'max:2000'],
-            'rental_blocked_dates' => [...$required, 'array'],
-            'rental_blocked_dates.*' => ['required', 'date'],
+            'rental_blocked_dates' => ['nullable', 'array'],
+            'rental_blocked_dates.*' => ['nullable', 'date'],
             'status' => ['nullable', 'string', 'max:50'],
             'is_rented_out' => ['nullable', 'boolean'],
             'is_sold' => ['nullable', 'boolean'],
