@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dress;
-use App\Models\Listing;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -16,24 +15,9 @@ class DressController extends Controller
         $dresses = Dress::query()
             ->latest()
             ->get();
-        $listings = Listing::query()
-            ->latest()
-            ->get();
-        $merged = $dresses
-            ->map(fn (Dress $dress): array => [
-                'source' => 'dress',
-                'item' => $dress,
-            ])
-            ->merge(
-                $listings->map(fn (Listing $listing): array => [
-                    'source' => 'listing',
-                    'item' => $listing,
-                ])
-            )
-            ->values();
 
         return response()->json([
-            'data' => $merged,
+            'data' => $dresses,
         ]);
     }
 
