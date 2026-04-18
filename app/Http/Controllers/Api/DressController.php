@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dress;
+use App\Models\Listing;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -14,11 +15,42 @@ class DressController extends Controller
     {
         $dresses = Dress::query()
             ->latest()
-            ->get();
+            ->get()
+            ->map(static fn (Dress $dress): array => $dress->toArray());
+        $listings = Listing::query()
+            ->latest()
+            ->get()
+            ->map(fn (Listing $listing): array => $this->mapListingToDressPayload($listing));
 
         return response()->json([
-            'data' => $dresses,
+            'data' => $dresses->merge($listings)->values(),
         ]);
+    }
+
+    private function mapListingToDressPayload(Listing $listing): array
+    {
+        return [
+            'id' => $listing->id,
+            'title' => $listing->title,
+            'description' => $listing->description,
+            'image_urls' => $listing->network_image_urls ?? [],
+            'sizes' => $listing->sizes ?? [],
+            'colors' => [],
+            'occasion' => $listing->occasion,
+            'condition' => $listing->condition,
+            'seller_type' => 'individual',
+            'rent_price' => $listing->rent_price,
+            'buy_price' => $listing->buy_price,
+            'listing_mode' => $listing->listing_mode,
+            'store_id' => null,
+            'individual_seller_name' => null,
+            'seller_email' => null,
+            'seller_phone' => null,
+            'seller_location' => null,
+            'popularity_score' => 0,
+            'created_at' => $listing->created_at,
+            'updated_at' => $listing->updated_at,
+        ];
     }
 
     public function show(Dress $dress): JsonResponse
